@@ -102,7 +102,6 @@ class Sequence:
         print(str(self.total_seq) + ' sequences processed, ' + str(self.total_dup) + ' duplicates were removed.')
         print("Saving results...")
         with open(output_name, 'w') as f:
-            print(self.seqdict)
             for key, value in self.seqdict.items():
                 f.write(key)
                 f.write('\n')
