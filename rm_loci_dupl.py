@@ -20,6 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("file", help="path to fasta file containing the multiple sequence alignment to be cleaned.")
 # optional parameters/inputs:
 parser.add_argument("--out", help="path/name of file output. False = output would be in current directory.") 
+parser.add_argument("--dprint", action='store_true', help="print out the seqnames of sequences that were removed.") 
 args = parser.parse_args()
 
 class Sequence:
@@ -66,12 +67,15 @@ class Sequence:
         self.line = line 
         return True  #return True when there is still line to be read 
     
-    def read_file(self): 
+    def read_file(self, dupl_print): 
         """
-        description
+        Iterate through the file line by line and process each line. 
+        
+        param dupl_print: logical, False if user did not include argument when script is executed
         """
         prev_loci_num = -100
         seqnamelist = []  # list of seqnames (to find duplciates)
+        self.dup_seqnamelist = []  # list of seqnames that are duplicates
                 
         while self.next_line():  # iterate through every lines in the file
             if self.line.startswith('>'):  # line containing seqname 
@@ -82,6 +86,8 @@ class Sequence:
                 prev_loci_num = loci_num
                 if seqname in seqnamelist:  # duplicate
                     self.total_dup += 1
+                    if dupl_print:
+                        self.dup_seqnamelist.append(self.line)  # add duplicated seqnames into list of duplicates
                 if seqname not in seqnamelist:  # seqname is new (not a duplicate)
                     seqnamelist.append(seqname)  # add seqname to list of seqnames 
                     self.seqdict[self.line] = ''  # record the seqname into dictionary containing all sequences 
@@ -113,7 +119,7 @@ class Sequence:
 if __name__ == '__main__':
     MSA_path = args.file  # path to the file 
     MSA = Sequence(MSA_path)  # create Sequence object and open file
-    MSA.read_file()  # process the file     
+    MSA.read_file(args.dprint)  # process the file     
     # SAVE FILE: 
     output_name = False  # no user specified name
     if args.out:  # user specified output file name 
